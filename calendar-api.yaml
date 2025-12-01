@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: Calendar Platform API - Mateo Herrera
+  version: 1.0.0
+  description: API para autenticación, gestión de calendarios y notificaciones.
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Auth
+    description: Autenticación de usuarios
+  - name: Calendars
+    description: Gestión de calendarios
+  - name: Notifications
+    description: Gestión de notificaciones
+  - name: Health
+    description: Endpoints de prueba/estado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserLogin:
+      type: object
+      properties:
+        username:
+          type: string
+          example: mateo
+        password:
+          type: string
+          format: password
+          example: "1234"
+      required:
+        - username
+        - password
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token JWT para futuras llamadas
+      required:
+        - token
+
+    Calendar:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        name:
+          type: string
+          example: "Calendario Principal"
+        description:
+          type: string
+          example: "Calendario de ejemplo"
+        encryptedData:
+          type: string
+          example: "ENCRYPTED_DATA"
+      required:
+        - id
+        - name
+        - encryptedData
+
+    CalendarCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Trabajo"
+        description:
+          type: string
+          example: "Reuniones y tareas laborales"
+      required:
+        - name
+
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        calendarId:
+          type: string
+          example: "1"
+        eventTime:
+          type: string
+          format: date-time
+          example: "2025-12-01T10:00:00Z"
+        message:
+          type: string
+          example: "Recordatorio de reunión"
+      required:
+        - id
+        - calendarId
+        - eventTime
+        - message
+
+    NotificationCreate:
+      type: object
+      properties:
+        calendarId:
+          type: string
+          example: "1"
+        eventTime:
+          type: string
+          format: date-time
+          example: "2025-12-01T10:00:00Z"
+        message:
+          type: string
+          example: "Recordatorio de reunión"
+      required:
+        - calendarId
+        - eventTime
+        - message
+
+paths:
+  /ping:
+    get:
+      tags:
+        - Health
+      summary: Comprobar que la API está viva
+      responses:
+        '200':
+          description: Respuesta correcta
+
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Autenticar usuario y obtener token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Autenticación exitosa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Credenciales inválidas
+
+  /calendars:
+    get:
+      tags:
+        - Calendars
+      summary: Obtener calendarios del usuario autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de calendarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Calendar'
+        '401':
+          description: No autenticado
+    post:
+      tags:
+        - Calendars
+      summary: Crear un nuevo calendario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalendarCreate'
+      responses:
+        '201':
+          description: Calendario creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calendar'
+        '401':
+          description: No autenticado
+
+  /calendars/{id}:
+    get:
+      tags:
+        - Calendars
+      summary: Obtener un calendario por id
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Calendario encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Calendar'
+        '401':
+          description: No autenticado
+        '403':
+          description: No autorizado
+        '404':
+          description: Calendario no encontrado
+
+  /notifications:
+    post:
+      tags:
+        - Notifications
+      summary: Crear una notificación para un calendario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationCreate'
+      responses:
+        '201':
+          description: Notificación creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        '401':
+          description: No autenticado
+        '403':
+          description: No autorizado
+
+security:
+  - bearerAuth: []
