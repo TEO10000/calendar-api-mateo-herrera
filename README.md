@@ -1,5 +1,5 @@
 Restricciones de la Solución Propuesta
-Nombre: Mateo Herrera
+Integrantes: Mateo Herrera, Sebastián Vallejo, Sergio 
 Fecha: 30/11/2025
 b) Restricciones de la solución propuesta
 La arquitectura planteada para el servicio de calendario presenta varias restricciones derivadas de requisitos funcionales, no funcionales y decisiones tecnológicas. A continuación, se detallan de forma clara y organizada:
